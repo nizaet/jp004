@@ -131,7 +131,12 @@ def _save_proposal(proposal):
     idem_ref = _user_ref().collection("idempotency").document(proposal["idempotency_key"])
     proposal_id = str(uuid.uuid4())
     proposal_ref = _proposal_ref(proposal_id)
-    request_hash = _digest({k: proposal[k] for k in ("operation", "transaction_id", "before_digest", "after_digest")})
+    request_hash = _digest({
+        "operation": proposal["operation"],
+        "transaction_id": None if proposal["operation"] == "create" else proposal["transaction_id"],
+        "before_digest": proposal["before_digest"],
+        "after_digest": proposal["after_digest"],
+    })
     tx = db().transaction()
 
     @firestore.transactional
@@ -201,7 +206,6 @@ def preview_transaction():
         if error:
             return jsonify(error=error), 400
 
-    proposal_id = str(uuid.uuid4())
     proposal = {
         "operation": operation,
         "transaction_id": transaction_id if operation != "create" else str(uuid.uuid4()),
@@ -219,7 +223,7 @@ def preview_transaction():
     except ValueError as exc:
         return jsonify(error=str(exc)), 409
     return jsonify({
-        "proposal_id": proposal_id, "status": "pending",
+        "proposal_id": proposal_id, "status": proposal.get("status", "pending"),
         "expires_in_seconds": PROPOSAL_TTL_SECONDS,
         "preview": {"operation": operation, "transaction_id": proposal["transaction_id"],
                     "before": before, "after": after,
