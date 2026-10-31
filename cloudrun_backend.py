@@ -260,7 +260,9 @@ def confirm_transaction():
         if proposal.get("idempotency_key") != idem:
             raise PermissionError("idempotency_key_mismatch")
         if proposal.get("status") == "committed":
-            return proposal.get("result") or {"status": "committed", "idempotent_replay": True}
+            replay = dict(proposal.get("result") or {"status": "committed"})
+            replay["idempotent_replay"] = True
+            return replay
         if proposal.get("status") != "pending":
             raise ValueError("proposal_not_pending")
         if int(proposal.get("expires_at_epoch", 0)) < int(time.time()):
@@ -453,7 +455,10 @@ def _mcp_confirm(args):
         if not snap.exists: raise LookupError("proposal_not_found")
         proposal = snap.to_dict() or {}
         if proposal.get("idempotency_key") != idem: raise PermissionError("idempotency_key_mismatch")
-        if proposal.get("status") == "committed": return proposal.get("result")
+        if proposal.get("status") == "committed":
+            replay = dict(proposal.get("result") or {"status": "committed"})
+            replay["idempotent_replay"] = True
+            return replay
         if proposal.get("status") != "pending": raise ValueError("proposal_not_pending")
         if int(proposal.get("expires_at_epoch", 0)) < int(time.time()): raise TimeoutError("proposal_expired")
         target = transaction_ref.document(proposal["transaction_id"]); old = target.get(transaction=tx)
