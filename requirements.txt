@@ -1,2 +1,4 @@
 Flask>=3.0
 requests>=2.31
+google-auth>=2.35,<3
+google-cloud-firestore>=2.19,<3
