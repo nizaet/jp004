@@ -1043,6 +1043,7 @@
   }
   ::-webkit-scrollbar-thumb:hover { background: var(--text-soft); }
 </style>
+<link rel="stylesheet" href="mobile-ui.css">
 </head>
 <body>
 <div class="app">
@@ -3345,7 +3346,9 @@ function printTable(tableId, title) {
     th, td { border: 1px solid #999; padding: 6px 8px; text-align: left; }
     th { background: #eee; font-weight: 700; }
     .num { text-align: right; }
-  </style></head><body><h1>${title}</h1>${table.outerHTML}</body></html>`);
+  </style></head><body><h1>${title}</h1>${table.outerHTML}<script defer src="avatar3d.js"></script>
+<script defer src="mobile-ui.js"></script>
+</body></html>`);
   printWindow.document.close();
   printWindow.focus();
   printWindow.print();
